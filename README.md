@@ -24,11 +24,9 @@ A comprehensive, **high-performance** cloud infrastructure platform offering ent
 - **Database**: PostgreSQL with proper indexing and query optimization
 - **Caching**: Redis for session management and data caching
 - **CDN**: Cloudinary integration for optimized image delivery
-=======
 # HTWO Cloud Services Platform
 
 A comprehensive cloud infrastructure platform offering enterprise-grade cloud services, web hosting, dedicated servers, and business software solutions. Built with modern web technologies to deliver scalable, secure, and high-performance cloud solutions.
->>>>>>> 219c35608397dbb81bec5d3ddb4ae2ad3369d3a1
 
 ## 🏗️ Architecture Overview
 
@@ -267,7 +265,6 @@ The application uses Clerk for authentication with the following features:
 - JWT token-based API authentication
 - Protected routes and admin access control
 
-<<<<<<< HEAD
 ## 📧 Contact & Support
 
 - **Sales**: +91 8076225440, +91 8595327337
@@ -290,8 +287,3 @@ This project is proprietary software owned by HTWO.
 
 HTWO is a leading provider of cloud infrastructure and business software solutions, specializing in enterprise-grade cloud services, web hosting, and ERP software deployments. With years of experience, we deliver world-class services that prioritize our clients' success.
 
----
-
-**Note**: This is a commercial project. All rights reserved. For business inquiries, please contact our sales team.
-=======
->>>>>>> 219c35608397dbb81bec5d3ddb4ae2ad3369d3a1
