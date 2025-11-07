@@ -14,13 +14,28 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "5432:5432"
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: redis_cache
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redispassword}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   # Backend Server
   server:
@@ -37,10 +52,16 @@ services:
       CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
       CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      PGHOST: postgres
+      PGDATABASE: ${POSTGRES_DB:-myapp}
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-password}
     ports:
       - "3000:3000"
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     volumes:
       - ./uploads:/app/uploads
@@ -52,4 +73,6 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local

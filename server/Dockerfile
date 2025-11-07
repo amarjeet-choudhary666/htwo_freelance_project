@@ -1,9 +1,8 @@
-# Multi-stage build for optimized production image
-FROM node:18-alpine AS base
+# ---------------------------
+# Build stage
+# ---------------------------
+FROM node:18-alpine AS builder
 
-# Install dependencies only when needed
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Copy package files
@@ -13,20 +12,17 @@ COPY prisma ./prisma/
 # Install dependencies
 RUN npm ci --only=production && npm cache clean --force
 
-# Build the source code
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copy source code
 COPY . .
 
-# Generate Prisma client
-RUN npx prisma generate
+# Generate Prisma client and build
+RUN npx prisma generate && npm run build
 
-# Build the application
-RUN npm run build
+# ---------------------------
+# Final stage
+# ---------------------------
+FROM node:18-alpine AS runner
 
-# Production image
-FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -41,14 +37,14 @@ COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/package.json ./package.json
 COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
 
+# Create necessary directories
+RUN mkdir -p /app/public/temp && chown -R nodejs:nodejs /app/public
+
 USER nodejs
 
 EXPOSE 3000
 
-ENV PORT=3000
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
-
-CMD ["node", "dist/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma generate && node dist/index.js"]
