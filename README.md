@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # HTWO Cloud Services Platform - OPTIMIZED
 
 A comprehensive, **high-performance** cloud infrastructure platform offering enterprise-grade cloud services, web hosting, dedicated servers, and business software solutions. Built with modern web technologies and optimized for production-scale performance, security, and scalability.
