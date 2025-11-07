@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+
+  firstname String? // Optional first name
+  // lastname  String? // Uncomment if needed
+
+  role         Role    @default(USER)
+  refreshToken String?
+
+  address     String? // Optional address
+  companyName String? // Optional company name
+  gstNumber   String? // Optional GST number
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services        Service[]
+  formSubmissions FormSubmission[]
+}
+
+model Service {
+  id           Int       @id @default(autoincrement())
+  name         String
+  categoryId   Int?
+  categoryTypeId Int?
+  description  String?
+  monthlyPrice Float?
+  yearlyPrice  Float?
+  imageUrl     String?
+  features     String[] // Array of strings for features
+  status       String   @default("active")
+  priority     Priority @default(LOW)
+
+  ram      String @default("")
+  storage  String @default("")
+
+  ownerId  Int
+  owner    User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  category     Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryType CategoryType? @relation(fields: [categoryTypeId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Partner {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  phone       String?
+  company     String?
+  logoUrl     String?
+  website     String?
+  description String?
+  status      String   @default("pending") // pending, approved, rejected
+  partnerType String?  // e.g., reseller, integrator, etc.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FormSubmission {
+  id      String @id @default(cuid())
+  name    String
+  email   String
+  phone   String?
+  service String?
+  message String?
+  type    String // demo, contact, get_in_touch
+  status  String @default("pending") // pending, contacted, resolved
+
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categoryTypes CategoryType[]
+  services      Service[]
+}
+
+model CategoryType {
+  id         Int      @id @default(autoincrement())
+  name       String
+  categoryId Int
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services Service[]
+}

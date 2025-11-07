@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Service" ADD COLUMN     "ram" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "storage" TEXT NOT NULL DEFAULT '';
